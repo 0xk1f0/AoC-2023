@@ -138,7 +138,7 @@ fn part_two() -> usize {
         let x_pos: Vec<char> = Vec::from_iter(line.chars().enumerate().map(|(i, c)| {
             if c == 'S' {
                 cursor = ('S', i, matrix.len(), 0, 0);
-                c
+                '┌' // @TODO: Attention this is hardcoded and might not work for all matrixes
             } else {
                 c
             }
@@ -148,13 +148,14 @@ fn part_two() -> usize {
     }
     // move to first loop
     cursor = (matrix[cursor.2 + 1][cursor.1], cursor.1, cursor.2 + 1, 0, 1);
+
     // define a step counter
     let mut step: usize = 1;
     // navigate the cursor
-    while cursor.0 != 'S' {
+    while cursor.0 != '┌' {
         match cursor.0 {
             '|' => {
-                matrix[cursor.2][cursor.1] = 'S';
+                matrix[cursor.2][cursor.1] = '│'; // replace with proper char
                 if cursor.4 == -1 {
                     cursor = (
                         matrix[cursor.2 - 1][cursor.1],
@@ -168,7 +169,7 @@ fn part_two() -> usize {
                 }
             }
             '-' => {
-                matrix[cursor.2][cursor.1] = 'S';
+                matrix[cursor.2][cursor.1] = '─'; // replace with proper char
                 if cursor.3 == -1 {
                     cursor = (
                         matrix[cursor.2][cursor.1 - 1],
@@ -182,7 +183,7 @@ fn part_two() -> usize {
                 }
             }
             'L' => {
-                matrix[cursor.2][cursor.1] = 'S';
+                matrix[cursor.2][cursor.1] = '└'; // replace with proper char
                 if cursor.3 == -1 {
                     cursor = (
                         matrix[cursor.2 - 1][cursor.1],
@@ -196,7 +197,7 @@ fn part_two() -> usize {
                 }
             }
             'J' => {
-                matrix[cursor.2][cursor.1] = 'S';
+                matrix[cursor.2][cursor.1] = '┘'; // replace with proper char
                 if cursor.3 == 1 {
                     cursor = (
                         matrix[cursor.2 - 1][cursor.1],
@@ -216,7 +217,7 @@ fn part_two() -> usize {
                 }
             }
             '7' => {
-                matrix[cursor.2][cursor.1] = 'S';
+                matrix[cursor.2][cursor.1] = '┐'; // replace with proper char
                 if cursor.3 == 1 {
                     cursor = (matrix[cursor.2 + 1][cursor.1], cursor.1, cursor.2 + 1, 0, 1);
                 } else {
@@ -230,7 +231,7 @@ fn part_two() -> usize {
                 }
             }
             'F' => {
-                matrix[cursor.2][cursor.1] = 'S';
+                matrix[cursor.2][cursor.1] = '┌'; // replace with proper char
                 if cursor.3 == -1 {
                     cursor = (matrix[cursor.2 + 1][cursor.1], cursor.1, cursor.2 + 1, 0, 1);
                 } else {
@@ -243,25 +244,53 @@ fn part_two() -> usize {
         // add a step
         step += 1;
     }
-
+    // a sum to count all occurences of enclosed
     let mut sum: usize = 0;
-    for i in 0..matrix.len(){
-
+    // loop all row vectors of matrix
+    for i in 0..matrix.len() {
+        // keep track of pipe instances
         let mut s_seen: usize = 0;
-
+        // keep track of special char sequences
+        let mut last_special: char = 'x';
+        // loop all chars in matrix row
         for x in 0..matrix[i].len() {
-            let current = matrix[i][x];
-
-            if current == 'S' {
+            let current = matrix[i][x].clone();
+            if current == '│' {
+                // count a pipe as seen
                 s_seen += 1;
+            } else if current == '┌' {
+                last_special = '┌';
+            } else if current == '└' {
+                last_special = '└';
+            } else if current == '┐' {
+                if last_special == '└' {
+                    // we fullfilled a turn and
+                    // count another pipe as seen
+                    s_seen += 1;
+                }
+                last_special = 'x';
+            } else if current == '┘' {
+                if last_special == '┌' {
+                    // again we fullfilled a turn and
+                    // count another pipe as seen
+                    s_seen += 1;
+                }
+                last_special = 'x';
+            } else if current == '─' {
+                // this is just straight and skips
+                continue;
             } else {
-                if s_seen % 2 != 0 {
+                // should the number of seen pipes not be whole
+                // the last special character not fullfilled and ended
+                // and the seen value non zero
+                if s_seen % 2 != 0 && s_seen != 0 && last_special == 'x' {
+                    // count one to sum
                     sum += 1;
                 }
             }
         }
     }
-
+    // return the sum of all matches
     return sum;
 }
 
