@@ -149,8 +149,6 @@ fn part_two() -> usize {
     // move to first loop
     cursor = (matrix[cursor.2 + 1][cursor.1], cursor.1, cursor.2 + 1, 0, 1);
 
-    // define a step counter
-    let mut step: usize = 1;
     // navigate the cursor
     while cursor.0 != '┌' {
         match cursor.0 {
@@ -241,8 +239,6 @@ fn part_two() -> usize {
             '.' => panic!("We hit a wall"),
             _ => panic!("Unexpected Direction"),
         }
-        // add a step
-        step += 1;
     }
     // a sum to count all occurences of enclosed
     let mut sum: usize = 0;
