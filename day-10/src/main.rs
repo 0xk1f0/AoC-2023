@@ -132,16 +132,12 @@ fn part_two() -> usize {
     let mut matrix: Vec<Vec<char>> = Vec::with_capacity(lines.len());
     // define a cursor for navigating
     let mut cursor: (char, usize, usize, i8, i8) = ('S', 0, 0, 1, 1);
-    // add a vector to store all corner pieces
-    let mut corner_points: Vec<(usize, usize)> = Vec::new();
     // iterate each line
     for line in lines {
         // define a x vector and find possible starting point
         let x_pos: Vec<char> = Vec::from_iter(line.chars().enumerate().map(|(i, c)| {
             if c == 'S' {
                 cursor = ('S', i, matrix.len(), 0, 0);
-                // add starting point again
-                corner_points.push((cursor.1, cursor.2));
                 c
             } else {
                 c
@@ -158,6 +154,7 @@ fn part_two() -> usize {
     while cursor.0 != 'S' {
         match cursor.0 {
             '|' => {
+                matrix[cursor.2][cursor.1] = 'S';
                 if cursor.4 == -1 {
                     cursor = (
                         matrix[cursor.2 - 1][cursor.1],
@@ -171,6 +168,7 @@ fn part_two() -> usize {
                 }
             }
             '-' => {
+                matrix[cursor.2][cursor.1] = 'S';
                 if cursor.3 == -1 {
                     cursor = (
                         matrix[cursor.2][cursor.1 - 1],
@@ -184,7 +182,7 @@ fn part_two() -> usize {
                 }
             }
             'L' => {
-                corner_points.push((cursor.1, cursor.2));
+                matrix[cursor.2][cursor.1] = 'S';
                 if cursor.3 == -1 {
                     cursor = (
                         matrix[cursor.2 - 1][cursor.1],
@@ -198,7 +196,7 @@ fn part_two() -> usize {
                 }
             }
             'J' => {
-                corner_points.push((cursor.1, cursor.2));
+                matrix[cursor.2][cursor.1] = 'S';
                 if cursor.3 == 1 {
                     cursor = (
                         matrix[cursor.2 - 1][cursor.1],
@@ -218,7 +216,7 @@ fn part_two() -> usize {
                 }
             }
             '7' => {
-                corner_points.push((cursor.1, cursor.2));
+                matrix[cursor.2][cursor.1] = 'S';
                 if cursor.3 == 1 {
                     cursor = (matrix[cursor.2 + 1][cursor.1], cursor.1, cursor.2 + 1, 0, 1);
                 } else {
@@ -232,7 +230,7 @@ fn part_two() -> usize {
                 }
             }
             'F' => {
-                corner_points.push((cursor.1, cursor.2));
+                matrix[cursor.2][cursor.1] = 'S';
                 if cursor.3 == -1 {
                     cursor = (matrix[cursor.2 + 1][cursor.1], cursor.1, cursor.2 + 1, 0, 1);
                 } else {
@@ -246,25 +244,25 @@ fn part_two() -> usize {
         step += 1;
     }
 
-    // add starting point again
-    corner_points.push((cursor.1, cursor.2));
+    let mut sum: usize = 0;
+    for i in 0..matrix.len(){
 
-    let mut area: f64 = 0.0;
-    let n = corner_points.len();
+        let mut s_seen: usize = 0;
 
-    for i in 0..n-1 {
-        let (x0, y0) = corner_points[i];
-        let (x1, y1) = corner_points[i + 1];
-        area += (x0 as f64 + x1 as f64) * (y1 as f64 - y0 as f64);
+        for x in 0..matrix[i].len() {
+            let current = matrix[i][x];
+
+            if current == 'S' {
+                s_seen += 1;
+            } else {
+                if s_seen % 2 != 0 {
+                    sum += 1;
+                }
+            }
+        }
     }
-    // absolute area and half
-    area = area.abs() * 0.5;
 
-    println!("Area is: {}", area);
-    println!("Number of Tiles is: {}", step);
-
-    // return area minus steps to get ecnlosed
-    return area as usize - step;
+    return sum;
 }
 
 fn main() {
